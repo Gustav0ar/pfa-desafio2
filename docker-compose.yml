@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=fullcycle
+    volumes:
+      - ./dbdata:/var/lib/mysql
+      - ./mysql/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    networks:
+      - firstnet
+    ports:
+      - 3036
+
+  myapp:
+    image: gustavoar/pfa-desafio2:latest
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+    ports:
+      - 3000
+    networks:
+      - firstnet
+      - secondnet
+    depends_on:
+      - mysql
+
+  nginx:
+    image: gustavoar/pfa-nginx2:latest
+    ports:
+      - 8000:80
+    networks:
+      - secondnet
+    depends_on:
+      - myapp
+
+networks:
+  firstnet:
+    driver: bridge
+  secondnet:
+    driver: bridge
